@@ -38,6 +38,16 @@ func (c *ContainerNode) Children() []Node {
 	return c.nodes
 }
 
+func (c *ContainerNode) ChildIdx(id string) int {
+	for i := 0; i < len(c.nodes); i++ {
+		if c.nodes[i].Id() == id {
+			return i
+		}
+	}
+
+	return -1
+}
+
 func (c *ContainerNode) AddChild(n Node) error {
 	n.SetParent(c)
 
@@ -47,12 +57,7 @@ func (c *ContainerNode) AddChild(n Node) error {
 }
 
 func (c *ContainerNode) DeleteChild(id string) error {
-	var i int
-	for i = 0; i < len(c.nodes); i++ {
-		if c.nodes[i].Id() == id {
-			break
-		}
-	}
+	i := c.ChildIdx(id)
 
 	if i == len(c.nodes) {
 		return fmt.Errorf("Node '%s' was not found!", id)
@@ -71,6 +76,37 @@ func (c *ContainerNode) DeleteChild(id string) error {
 	c.nodes = append(head, tail...)
 
 	return nil
+}
+
+func (c *ContainerNode) MoveChildLeft(id string) {
+	idx := c.ChildIdx(id)
+	if idx == -1 || idx == 0 {
+		return
+	}
+
+	c.moveChildFromTo(idx, idx-1)
+}
+
+func (c *ContainerNode) MoveChildRight(id string) {
+	idx := c.ChildIdx(id)
+	if idx == -1 || idx == len(c.nodes)-1 {
+		return
+	}
+
+	c.moveChildFromTo(idx, idx+1)
+}
+
+func (c *ContainerNode) MoveChildTo(id string, idx int) {
+	if idx >= len(c.nodes) {
+		return
+	}
+
+	fromIdx := c.ChildIdx(id)
+	if fromIdx == -1 || fromIdx == idx {
+		return
+	}
+
+	c.moveChildFromTo(fromIdx, idx)
 }
 
 func (c *ContainerNode) FindNodeById(id string) Node {
@@ -113,4 +149,23 @@ func (c *ContainerNode) BFSIds() []string {
 	}
 
 	return ids
+}
+
+func (c *ContainerNode) moveChildFromTo(fromIdx, toIdx int) {
+	newNodes := make([]Node, len(c.nodes))
+	if fromIdx > 0 {
+		copy(newNodes, c.nodes[:fromIdx])
+	}
+
+	for i := fromIdx; i < toIdx; i++ {
+		newNodes[i] = c.nodes[i+1]
+	}
+
+	newNodes[toIdx] = c.nodes[fromIdx]
+
+	if toIdx < len(c.nodes)-1 {
+		copy(newNodes[toIdx+1:], c.nodes[toIdx:])
+	}
+
+	c.nodes = newNodes
 }

@@ -16,9 +16,15 @@ type Node interface {
 	SetParent(Node)
 	IsLeaf() bool
 	Children() []Node
+	ChildIdx(id string) int
 	AddChild(Node) error
 	DeleteChild(id string) error
 	FindNodeById(id string) Node
+
+	// Children movement
+	MoveChildLeft(id string)
+	MoveChildRight(id string)
+	MoveChildTo(id string, idx int)
 
 	// Debug
 	BFSIds() []string

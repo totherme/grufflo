@@ -60,10 +60,14 @@ func (b *Backend) MoveOut(id string) error {
 	if grandParent == nil {
 		log.Debug("adds-to-ginkgo-file")
 		b.ginkgoFile.AddContainer(node.(*types.ContainerNode))
-	} else {
-		log.Debug("adds-to-grandparent-container")
-		grandParent.AddChild(node)
+		return nil
 	}
+
+	log.Debug("adds-to-grandparent-container")
+	grandParent.AddChild(node)
+
+	parentsIdx := grandParent.ChildIdx(parent.Id())
+	grandParent.MoveChildTo(node.Id(), parentsIdx)
 
 	return nil
 }

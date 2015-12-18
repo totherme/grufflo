@@ -36,6 +36,10 @@ func (s *SpecNode) Children() []Node {
 	return []Node{}
 }
 
+func (s *SpecNode) ChildIdx(_ string) int {
+	return -1
+}
+
 func (s *SpecNode) AddChild(n Node) error {
 	return errors.New("Spec is a leaf node!")
 }
@@ -43,6 +47,12 @@ func (s *SpecNode) AddChild(n Node) error {
 func (s *SpecNode) DeleteChild(_ string) error {
 	return errors.New("Spec is a leaf node!")
 }
+
+func (s *SpecNode) MoveChildLeft(id string) {}
+
+func (s *SpecNode) MoveChildRight(id string) {}
+
+func (s *SpecNode) MoveChildTo(id string, idx int) {}
 
 func (s *SpecNode) FindNodeById(_ string) Node {
 	// it is always leaf
