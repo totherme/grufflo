@@ -10,25 +10,36 @@ type Parser interface {
 	Parse(filePath string) (*types.GinkgoFile, error)
 }
 
+//go:generate counterfeiter . Compiler
+type Compiler interface {
+	Compile(gf *types.GinkgoFile, filePath string) error
+}
+
 type Backend struct {
-	Parser Parser
+	Parser   Parser
+	Compiler Compiler
 
-	FilePath string
-
-	ginkgoFile *types.GinkgoFile
+	InFilePath  string
+	OutFilePath string
 
 	Logger lager.Logger
+
+	ginkgoFile *types.GinkgoFile
 }
 
 func (b *Backend) Start() error {
 	var err error
 
-	b.ginkgoFile, err = b.Parser.Parse(b.FilePath)
+	b.ginkgoFile, err = b.Parser.Parse(b.InFilePath)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (b *Backend) Compile() error {
+	return b.Compiler.Compile(b.ginkgoFile, b.OutFilePath)
 }
 
 func (b *Backend) MoveDown(id string) error {

@@ -12,14 +12,16 @@ import (
 
 var _ = Describe("Backend", func() {
 	var (
-		fakeParser *fakes.FakeParser
-		logger     lager.Logger
+		fakeParser   *fakes.FakeParser
+		fakeCompiler *fakes.FakeCompiler
+		logger       lager.Logger
 
 		bcknd *backend.Backend
 	)
 
 	BeforeEach(func() {
 		fakeParser = new(fakes.FakeParser)
+		fakeCompiler = new(fakes.FakeCompiler)
 
 		ginkgoFile := &types.GinkgoFile{
 			BoundVariables: []types.Variable{},
@@ -103,8 +105,9 @@ var _ = Describe("Backend", func() {
 		logger = lagertest.NewTestLogger("test")
 
 		bcknd = &backend.Backend{
-			Parser: fakeParser,
-			Logger: logger,
+			Parser:   fakeParser,
+			Compiler: fakeCompiler,
+			Logger:   logger,
 		}
 
 		Expect(bcknd.Start()).To(Succeed())
