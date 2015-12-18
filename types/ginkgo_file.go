@@ -26,7 +26,6 @@ func (g *GinkgoFile) BFSIds() []string {
 	for _, c := range g.containers {
 		ids = append(ids, c.Id())
 	}
-	fmt.Println("g.containers=", g.containers)
 
 	for _, c := range g.containers {
 		ids = append(ids, c.BFSIds()...)
@@ -37,7 +36,6 @@ func (g *GinkgoFile) BFSIds() []string {
 
 func (g *GinkgoFile) AddContainer(c *ContainerNode) {
 	g.containers = append(g.containers, c)
-	fmt.Println("g.containers=", g.containers)
 
 	c.SetParent(nil)
 }

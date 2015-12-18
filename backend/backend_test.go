@@ -1,8 +1,6 @@
 package backend_test
 
 import (
-	"fmt"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pivotal-golang/lager"
@@ -88,9 +86,6 @@ var _ = Describe("Backend", func() {
 			Subject:    "Listens to a train station",
 		})
 		c0.AddChild(c03)
-
-		fmt.Println(ginkgoFile.BFSIds())
-		fmt.Println("hoyhoyhoy")
 
 		fakeParser.ParseReturns(ginkgoFile, nil)
 

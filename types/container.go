@@ -49,6 +49,9 @@ func (c *ContainerNode) AddChild(n Node) error {
 func (c *ContainerNode) DeleteChild(id string) error {
 	var i int
 	for i = 0; i < len(c.nodes); i++ {
+		if c.nodes[i].Id() == id {
+			break
+		}
 	}
 
 	if i == len(c.nodes) {
