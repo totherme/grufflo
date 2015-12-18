@@ -9,18 +9,18 @@ import (
 )
 
 type FakeParser struct {
-	ParseStub        func(filePath string) (types.GinkgoFile, error)
+	ParseStub        func(filePath string) (*types.GinkgoFile, error)
 	parseMutex       sync.RWMutex
 	parseArgsForCall []struct {
 		filePath string
 	}
 	parseReturns struct {
-		result1 types.GinkgoFile
+		result1 *types.GinkgoFile
 		result2 error
 	}
 }
 
-func (fake *FakeParser) Parse(filePath string) (types.GinkgoFile, error) {
+func (fake *FakeParser) Parse(filePath string) (*types.GinkgoFile, error) {
 	fake.parseMutex.Lock()
 	fake.parseArgsForCall = append(fake.parseArgsForCall, struct {
 		filePath string
@@ -45,10 +45,10 @@ func (fake *FakeParser) ParseArgsForCall(i int) string {
 	return fake.parseArgsForCall[i].filePath
 }
 
-func (fake *FakeParser) ParseReturns(result1 types.GinkgoFile, result2 error) {
+func (fake *FakeParser) ParseReturns(result1 *types.GinkgoFile, result2 error) {
 	fake.ParseStub = nil
 	fake.parseReturns = struct {
-		result1 types.GinkgoFile
+		result1 *types.GinkgoFile
 		result2 error
 	}{result1, result2}
 }

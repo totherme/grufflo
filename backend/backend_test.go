@@ -23,11 +23,11 @@ var _ = Describe("Backend", func() {
 	BeforeEach(func() {
 		fakeParser = new(fakes.FakeParser)
 
-		ginkgoFile := types.GinkgoFile{
+		ginkgoFile := &types.GinkgoFile{
 			BoundVariables: []types.Variable{},
 		}
 
-		c0 := types.ContainerNode{
+		c0 := &types.ContainerNode{
 			Identifier: "/0",
 			Subject:    "Lifecycle",
 			BoundVariables: []types.Variable{
@@ -37,15 +37,15 @@ var _ = Describe("Backend", func() {
 			BeforeEach: fakes.FakeExpr("I am setting up client and container"),
 			AfterEach:  fakes.FakeExpr("I am tearing down client and container"),
 		}
-		c0.AddChild(types.SpecNode{
+		c0.AddChild(&types.SpecNode{
 			Identifier: "/0/0",
 		})
-		c0.AddChild(types.SpecNode{
+		c0.AddChild(&types.SpecNode{
 			Identifier: "/0/1",
 		})
 		ginkgoFile.AddContainer(c0)
 
-		c02 := types.ContainerNode{
+		c02 := &types.ContainerNode{
 			Identifier: "/0/2",
 			Subject:    "StreamIn",
 			BoundVariables: []types.Variable{
@@ -54,11 +54,11 @@ var _ = Describe("Backend", func() {
 			BeforeEach: fakes.FakeExpr("I am setting up tarStream"),
 			AfterEach:  fakes.FakeExpr("I am tearing down tarStream"),
 		}
-		c02.AddChild(types.SpecNode{
+		c02.AddChild(&types.SpecNode{
 			Identifier: "/0/2/0",
 			Subject:    "Streams files as root",
 		})
-		c02.AddChild(types.SpecNode{
+		c02.AddChild(&types.SpecNode{
 			Identifier: "/0/2/1",
 			Subject:    "Streams files as alice",
 			FreeVariables: []types.Variable{
@@ -69,7 +69,7 @@ var _ = Describe("Backend", func() {
 		})
 		c0.AddChild(c02)
 
-		c03 := types.ContainerNode{
+		c03 := &types.ContainerNode{
 			Identifier: "/0/3",
 			Subject:    "NetIn",
 			BoundVariables: []types.Variable{
@@ -79,17 +79,18 @@ var _ = Describe("Backend", func() {
 			BeforeEach: fakes.FakeExpr("I am setting up ip and port"),
 			AfterEach:  fakes.FakeExpr("I am tearing down ip and port"),
 		}
-		c03.AddChild(types.SpecNode{
+		c03.AddChild(&types.SpecNode{
 			Identifier: "/0/3/0",
 			Subject:    "Listens to a port",
 		})
-		c03.AddChild(types.SpecNode{
+		c03.AddChild(&types.SpecNode{
 			Identifier: "/0/3/1",
 			Subject:    "Listens to a train station",
 		})
 		c0.AddChild(c03)
 
 		fmt.Println(ginkgoFile.BFSIds())
+		fmt.Println("hoyhoyhoy")
 
 		fakeParser.ParseReturns(ginkgoFile, nil)
 

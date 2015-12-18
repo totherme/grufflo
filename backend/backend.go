@@ -7,7 +7,7 @@ import (
 
 //go:generate counterfeiter . Parser
 type Parser interface {
-	Parse(filePath string) (types.GinkgoFile, error)
+	Parse(filePath string) (*types.GinkgoFile, error)
 }
 
 type Backend struct {
@@ -15,7 +15,7 @@ type Backend struct {
 
 	FilePath string
 
-	ginkgoFile types.GinkgoFile
+	ginkgoFile *types.GinkgoFile
 
 	Logger lager.Logger
 }
@@ -59,7 +59,7 @@ func (b *Backend) MoveOut(id string) error {
 
 	if grandParent == nil {
 		log.Debug("adds-to-ginkgo-file")
-		b.ginkgoFile.AddContainer(node.(types.ContainerNode))
+		b.ginkgoFile.AddContainer(node.(*types.ContainerNode))
 	} else {
 		log.Debug("adds-to-grandparent-container")
 		grandParent.AddChild(node)
@@ -68,6 +68,6 @@ func (b *Backend) MoveOut(id string) error {
 	return nil
 }
 
-func (b *Backend) GinkgoFile() types.GinkgoFile {
+func (b *Backend) GinkgoFile() *types.GinkgoFile {
 	return b.ginkgoFile
 }

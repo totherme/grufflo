@@ -18,27 +18,27 @@ type ContainerNode struct {
 	parent Node
 }
 
-func (c ContainerNode) Id() string {
+func (c *ContainerNode) Id() string {
 	return c.Identifier
 }
 
-func (c ContainerNode) Parent() Node {
+func (c *ContainerNode) Parent() Node {
 	return c.parent
 }
 
-func (c ContainerNode) SetParent(n Node) {
+func (c *ContainerNode) SetParent(n Node) {
 	c.parent = n
 }
 
-func (c ContainerNode) IsLeaf() bool {
+func (c *ContainerNode) IsLeaf() bool {
 	return false
 }
 
-func (c ContainerNode) Children() []Node {
+func (c *ContainerNode) Children() []Node {
 	return c.nodes
 }
 
-func (c ContainerNode) AddChild(n Node) error {
+func (c *ContainerNode) AddChild(n Node) error {
 	n.SetParent(c)
 
 	c.nodes = append(c.nodes, n)
@@ -46,7 +46,7 @@ func (c ContainerNode) AddChild(n Node) error {
 	return nil
 }
 
-func (c ContainerNode) DeleteChild(id string) error {
+func (c *ContainerNode) DeleteChild(id string) error {
 	var i int
 	for i = 0; i < len(c.nodes); i++ {
 	}
@@ -70,15 +70,15 @@ func (c ContainerNode) DeleteChild(id string) error {
 	return nil
 }
 
-func (c ContainerNode) FindNodeById(id string) Node {
-	containers := []ContainerNode{}
+func (c *ContainerNode) FindNodeById(id string) Node {
+	containers := []*ContainerNode{}
 
 	for _, n := range c.nodes {
 		if id == n.Id() {
 			return n
 		}
 
-		if c, ok := n.(ContainerNode); ok {
+		if c, ok := n.(*ContainerNode); ok {
 			containers = append(containers, c)
 		}
 	}
@@ -92,14 +92,14 @@ func (c ContainerNode) FindNodeById(id string) Node {
 	return nil
 }
 
-func (c ContainerNode) BFSIds() []string {
+func (c *ContainerNode) BFSIds() []string {
 	ids := []string{}
-	containers := []ContainerNode{}
+	containers := []*ContainerNode{}
 
 	for _, n := range c.nodes {
 		ids = append(ids, n.Id())
 
-		if c, ok := n.(ContainerNode); ok {
+		if c, ok := n.(*ContainerNode); ok {
 			containers = append(containers, c)
 		}
 	}
