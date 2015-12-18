@@ -43,3 +43,11 @@ func (g *GinkgoFile) AddContainer(c *ContainerNode) {
 
 	c.SetParent(nil)
 }
+
+func (g *GinkgoFile) Children() []Node {
+	kids := make([]Node, len(g.containers))
+	for i := range g.containers {
+		kids[i] = g.containers[i]
+	}
+	return kids
+}

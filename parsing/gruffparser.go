@@ -4,8 +4,13 @@ import (
 	"fmt"
 	"go/ast"
 	"go/parser"
+	"go/token"
 	"reflect"
+
+	"github.com/totherme/grufflo/types"
 )
+
+var idgen int
 
 func GetFVs(code string) ([]string, error) {
 	codeAst, err := parser.ParseExpr(code)
@@ -25,22 +30,11 @@ func newFvGatherer() *fvGatherer {
 }
 
 type fvGatherer struct {
-	count int
-	types []string
-
 	freevars  map[string]struct{}
 	boundvars map[string]struct{}
 }
 
 func (g *fvGatherer) Visit(n ast.Node) ast.Visitor {
-	g.count++
-	typ := reflect.TypeOf(n)
-	typstr := "nil-bugger"
-	if typ != nil {
-		typstr = typ.String()
-	}
-	g.types = append(g.types, typstr)
-
 	switch n := n.(type) {
 	default:
 		typ := reflect.TypeOf(n)
@@ -124,4 +118,78 @@ func (g *bvGatherer) Visit(n ast.Node) ast.Visitor {
 	}
 
 	return g
+}
+
+type GruffParser struct{}
+
+func (gp GruffParser) Parse(fp string) (*types.GinkgoFile, error) {
+	fset := token.NewFileSet()
+
+	codeAst, err := parser.ParseFile(fset, fp, nil, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	gfp := &ginkFileParser{
+		ginkFile: &types.GinkgoFile{},
+	}
+	ast.Walk(gfp, codeAst)
+
+	return gfp.ginkFile, nil
+}
+
+type ginkFileParser struct {
+	ginkFile *types.GinkgoFile
+}
+
+func (p *ginkFileParser) Visit(n ast.Node) ast.Visitor {
+	switch n := n.(type) {
+	default:
+		typ := reflect.TypeOf(n)
+		if typ != nil {
+			fmt.Printf("GFP: node type: %s\n", typ.String())
+		}
+	case *ast.CallExpr:
+		// This could be a describe block!
+		expr := n.Fun
+		switch expr := expr.(type) {
+		default:
+			break
+		case *ast.Ident:
+			if expr.Name == "Describe" {
+				// This IS a describe block!
+				fmt.Println("This IS a describe block!")
+
+				describe := &types.ContainerNode{
+					Identifier: newID(),
+				}
+				p.ginkFile.AddContainer(describe)
+				return &ginkContainerParser{ginkContainer: describe}
+			}
+		}
+		return p
+	}
+	return p
+}
+
+type ginkContainerParser struct {
+	ginkContainer *types.ContainerNode
+}
+
+func (p *ginkContainerParser) Visit(n ast.Node) ast.Visitor {
+	switch n := n.(type) {
+	default:
+		typ := reflect.TypeOf(n)
+		if typ != nil {
+			fmt.Printf("GCP: node type: %s\n", typ.String())
+		}
+	case *ast.BasicLit:
+		fmt.Printf("GODP: basic lit with value: %s\n", n.Value)
+		p.ginkContainer.Subject = n.Value
+	}
+	return p
+}
+
+func newID() string {
+	return fmt.Sprintf("%d", idgen)
 }
