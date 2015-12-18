@@ -12,6 +12,10 @@ type GinkgoFile struct {
 
 func (g *GinkgoFile) FindNodeById(id string) (Node, error) {
 	for _, c := range g.containers {
+		if c.Id() == id {
+			return c, nil
+		}
+
 		if n := c.FindNodeById(id); n != nil {
 			return n, nil
 		}

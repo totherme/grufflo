@@ -40,7 +40,8 @@ func (b *Backend) MoveOut(id string) error {
 		return err
 	}
 
-	parent := node.Parent()
+	pNode := node.Parent()
+	parent := pNode.(*types.ContainerNode)
 	if parent == nil {
 		log.Debug("is-top-level-container")
 		return nil
@@ -51,7 +52,8 @@ func (b *Backend) MoveOut(id string) error {
 		return err
 	}
 
-	grandParent := parent.Parent()
+	gpNode := parent.Parent()
+	grandParent := gpNode.(*types.ContainerNode)
 	if grandParent == nil && node.IsLeaf() {
 		log.Debug("is-top-level-spec")
 		return nil
@@ -59,7 +61,9 @@ func (b *Backend) MoveOut(id string) error {
 
 	if grandParent == nil {
 		log.Debug("adds-to-ginkgo-file")
-		b.ginkgoFile.AddContainer(node.(*types.ContainerNode))
+		c := node.(*types.ContainerNode)
+		b.ginkgoFile.AddContainer(c)
+		// b.merge(c, parent)
 		return nil
 	}
 
@@ -69,9 +73,29 @@ func (b *Backend) MoveOut(id string) error {
 	parentsIdx := grandParent.ChildIdx(parent.Id())
 	grandParent.MoveChildTo(node.Id(), parentsIdx)
 
+	b.merge(grandParent, parent)
+
 	return nil
 }
 
 func (b *Backend) GinkgoFile() *types.GinkgoFile {
 	return b.ginkgoFile
+}
+
+func (b *Backend) merge(dest, src *types.ContainerNode) error {
+	var err error
+
+	dest.BoundVariables = append(dest.BoundVariables, src.BoundVariables...)
+
+	dest.BeforeEach, err = dest.BeforeEach.Merge(src.BeforeEach)
+	if err != nil {
+		return err
+	}
+
+	dest.AfterEach, err = dest.AfterEach.Merge(src.AfterEach)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

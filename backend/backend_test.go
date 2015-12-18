@@ -32,8 +32,8 @@ var _ = Describe("Backend", func() {
 				fakes.FakeVariable("client"),
 				fakes.FakeVariable("container"),
 			},
-			BeforeEach: fakes.FakeExpr("I am setting up client and container"),
-			AfterEach:  fakes.FakeExpr("I am tearing down client and container"),
+			BeforeEach: fakes.FakeExpr("boo"),
+			AfterEach:  fakes.FakeExpr("foo"),
 		}
 		c0.AddChild(&types.SpecNode{
 			Identifier: "/0/0",
@@ -49,8 +49,8 @@ var _ = Describe("Backend", func() {
 			BoundVariables: []types.Variable{
 				fakes.FakeVariable("tarStream"),
 			},
-			BeforeEach: fakes.FakeExpr("I am setting up tarStream"),
-			AfterEach:  fakes.FakeExpr("I am tearing down tarStream"),
+			BeforeEach: fakes.FakeExpr("bee"),
+			AfterEach:  fakes.FakeExpr("fee"),
 		}
 		c02.AddChild(&types.SpecNode{
 			Identifier: "/0/2/0",
@@ -74,16 +74,27 @@ var _ = Describe("Backend", func() {
 				fakes.FakeVariable("ip"),
 				fakes.FakeVariable("port"),
 			},
-			BeforeEach: fakes.FakeExpr("I am setting up ip and port"),
-			AfterEach:  fakes.FakeExpr("I am tearing down ip and port"),
+			BeforeEach: fakes.FakeExpr("baa"),
+			AfterEach:  fakes.FakeExpr("taa"),
 		}
 		c03.AddChild(&types.SpecNode{
 			Identifier: "/0/3/0",
 			Subject:    "Listens to a port",
+			FreeVariables: []types.Variable{
+				fakes.FakeVariable("port"),
+				fakes.FakeVariable("client"),
+				fakes.FakeVariable("container"),
+			},
 		})
 		c03.AddChild(&types.SpecNode{
 			Identifier: "/0/3/1",
 			Subject:    "Listens to a train station",
+			FreeVariables: []types.Variable{
+				fakes.FakeVariable("port"),
+				fakes.FakeVariable("ip"),
+				fakes.FakeVariable("client"),
+				fakes.FakeVariable("container"),
+			},
 		})
 		c0.AddChild(c03)
 
@@ -95,18 +106,38 @@ var _ = Describe("Backend", func() {
 			Parser: fakeParser,
 			Logger: logger,
 		}
+
+		Expect(bcknd.Start()).To(Succeed())
 	})
 
-	// Notes: we could run a tree-search algorithm and assert on the expected
-	//	order of the ids.
-	It("should work", func() {
-		Expect(bcknd.Start()).To(Succeed())
+	Describe("MoveOut", func() {
+		It("should reorder nodes correctly", func() {
+			Expect(bcknd.MoveOut("/0/3/0")).To(Succeed())
 
-		Expect(bcknd.MoveOut("/0/3/0")).To(Succeed())
-		ids := bcknd.GinkgoFile().BFSIds()
-		Expect(ids).Should(Equal([]string{
-			"/0", "/0/0", "/0/1", "/0/2", "/0/3/0", "/0/3", "/0/2/0", "/0/2/1",
-			"/0/3/1",
-		}))
+			ids := bcknd.GinkgoFile().BFSIds()
+			Expect(ids).Should(Equal([]string{
+				"/0", "/0/0", "/0/1", "/0/2", "/0/3/0", "/0/3", "/0/2/0", "/0/2/1",
+				"/0/3/1",
+			}))
+		})
+
+		It("should update bound variables of new context", func() {
+			Expect(bcknd.MoveOut("/0/3/0")).To(Succeed())
+
+			ginkgoFile := bcknd.GinkgoFile()
+
+			n, err := ginkgoFile.FindNodeById("/0")
+			Expect(err).NotTo(HaveOccurred())
+			newParent := n.(*types.ContainerNode)
+
+			Expect(newParent.BoundVariables).To(Equal([]types.Variable{
+				fakes.FakeVariable("client"),
+				fakes.FakeVariable("container"),
+				fakes.FakeVariable("ip"),
+				fakes.FakeVariable("port"),
+			}))
+			Expect(newParent.BeforeEach).To(Equal(fakes.FakeExpr("boo\n\nbaa")))
+			Expect(newParent.AfterEach).To(Equal(fakes.FakeExpr("foo\n\ntaa")))
+		})
 	})
 })
