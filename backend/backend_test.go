@@ -140,4 +140,28 @@ var _ = Describe("Backend", func() {
 			Expect(newParent.AfterEach).To(Equal(fakes.FakeExpr("foo\n\ntaa")))
 		})
 	})
+
+	Describe("MoveUp", func() {
+		It("should reorder nodes correctly", func() {
+			Expect(bcknd.MoveUp("/0/2")).To(Succeed())
+
+			ids := bcknd.GinkgoFile().BFSIds()
+			Expect(ids).Should(Equal([]string{
+				"/0", "/0/0", "/0/2", "/0/1", "/0/3", "/0/2/0", "/0/2/1", "/0/3/0",
+				"/0/3/1",
+			}))
+		})
+	})
+
+	Describe("MoveDown", func() {
+		It("should reorder nodes correctly", func() {
+			Expect(bcknd.MoveDown("/0/3/0")).To(Succeed())
+
+			ids := bcknd.GinkgoFile().BFSIds()
+			Expect(ids).Should(Equal([]string{
+				"/0", "/0/0", "/0/1", "/0/2", "/0/3", "/0/2/0", "/0/2/1", "/0/3/1",
+				"/0/3/0",
+			}))
+		})
+	})
 })

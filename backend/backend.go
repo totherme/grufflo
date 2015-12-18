@@ -31,6 +31,48 @@ func (b *Backend) Start() error {
 	return nil
 }
 
+func (b *Backend) MoveDown(id string) error {
+	log := b.Logger.Session("move-down", lager.Data{"NodeId": id})
+
+	node, err := b.ginkgoFile.FindNodeById(id)
+	if err != nil {
+		log.Error("find-node-by-id", err)
+		return err
+	}
+
+	pNode := node.Parent()
+	parent := pNode.(*types.ContainerNode)
+	if parent == nil {
+		log.Debug("is-top-level-container")
+		return nil
+	}
+
+	pNode.MoveChildRight(node.Id())
+
+	return nil
+}
+
+func (b *Backend) MoveUp(id string) error {
+	log := b.Logger.Session("move-up", lager.Data{"NodeId": id})
+
+	node, err := b.ginkgoFile.FindNodeById(id)
+	if err != nil {
+		log.Error("find-node-by-id", err)
+		return err
+	}
+
+	pNode := node.Parent()
+	parent := pNode.(*types.ContainerNode)
+	if parent == nil {
+		log.Debug("is-top-level-container")
+		return nil
+	}
+
+	pNode.MoveChildLeft(node.Id())
+
+	return nil
+}
+
 func (b *Backend) MoveOut(id string) error {
 	log := b.Logger.Session("move-out", lager.Data{"NodeId": id})
 

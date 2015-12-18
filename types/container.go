@@ -153,18 +153,29 @@ func (c *ContainerNode) BFSIds() []string {
 
 func (c *ContainerNode) moveChildFromTo(fromIdx, toIdx int) {
 	newNodes := make([]Node, len(c.nodes))
-	if fromIdx > 0 {
-		copy(newNodes, c.nodes[:fromIdx])
-	}
 
-	for i := fromIdx; i < toIdx; i++ {
-		newNodes[i] = c.nodes[i+1]
-	}
+	if fromIdx < toIdx {
+		if fromIdx > 0 {
+			copy(newNodes[:fromIdx], c.nodes[:fromIdx])
+		}
 
-	newNodes[toIdx] = c.nodes[fromIdx]
+		if toIdx < len(c.nodes)-1 {
+			copy(newNodes[toIdx+1:], c.nodes[toIdx+1:])
+		}
+		copy(newNodes[fromIdx:toIdx], c.nodes[fromIdx+1:toIdx+1])
 
-	if toIdx < len(c.nodes)-1 {
-		copy(newNodes[toIdx+1:], c.nodes[toIdx:])
+		newNodes[toIdx] = c.nodes[fromIdx]
+	} else {
+		if toIdx > 0 {
+			copy(newNodes[:toIdx], c.nodes[:toIdx])
+		}
+
+		newNodes[toIdx] = c.nodes[fromIdx]
+
+		if fromIdx < len(c.nodes)-1 {
+			copy(newNodes[fromIdx+1:], c.nodes[fromIdx+1:])
+		}
+		copy(newNodes[toIdx+1:fromIdx+1], c.nodes[toIdx:fromIdx])
 	}
 
 	c.nodes = newNodes
